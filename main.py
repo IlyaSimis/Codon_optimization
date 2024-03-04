@@ -22,3 +22,5 @@ class CodonSelector:
                 selected_codons.append(most_frequent_codon['codon'])
 
         return selected_codons
+
+test
