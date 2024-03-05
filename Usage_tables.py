@@ -21,5 +21,6 @@ class Tables:
 
     def get_result(self):
         return self.result
+
     def get_codons_info(self, amino_acid):
         return self.result.get(amino_acid)

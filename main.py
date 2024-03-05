@@ -21,6 +21,11 @@ class CodonSelector:
                 most_frequent_codon = max(codons_info, key=lambda x: x['relative_frequency'])
                 selected_codons.append(most_frequent_codon['codon'])
 
+        stop_codon_info = self.tables.get_codons_info('*')
+        if stop_codon_info:
+            stop_codon = max(stop_codon_info, key=lambda x: x['relative_frequency'])
+            selected_codons.append(stop_codon['codon'])
+
         return selected_codons
 
 
