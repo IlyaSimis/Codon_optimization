@@ -14,6 +14,8 @@ class CodonSelector:
 
     def select_codon(self, amino_acid_sequence):
         selected_codons = []
+        if amino_acid_sequence[0] != 'M':
+            raise ValueError("Sequence must start with start codon")
 
         for amino_acid in amino_acid_sequence:
             codons_info = self.tables.get_codons_info(amino_acid)

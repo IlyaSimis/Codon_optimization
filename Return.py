@@ -1,7 +1,7 @@
 from main import *
 
 selector_instance = CodonSelector(organism="ecoli")
-amino_acid_sequence = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA"
+amino_acid_sequence = "MAUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA"
 selected_codons = selector_instance.select_codon(amino_acid_sequence)
 
 print(selected_codons)
