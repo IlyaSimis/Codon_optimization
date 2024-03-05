@@ -19,5 +19,7 @@ class Tables:
 
             self.result[amino_acid].append({"codon": codon, "relative_frequency": relative_frequency})
 
+    def get_result(self):
+        return self.result
     def get_codons_info(self, amino_acid):
         return self.result.get(amino_acid)

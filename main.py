@@ -22,3 +22,19 @@ class CodonSelector:
                 selected_codons.append(most_frequent_codon['codon'])
 
         return selected_codons
+
+
+class CAICalculator:
+    def __init__(self, codons, codon_table):
+        self.codons = codons
+        self.codon_table = codon_table
+
+    def calculate_cai(self):
+        reference_values = [codon_data['relative_frequency'] for codon, codon_data in self.codon_table.items() if codon in self.codons]
+        target_values = [codon_data['relative_frequency'] for codon, codon_data in self.codon_table.items() if codon in self.codons]
+
+        cai = 1
+        for ref_val, target_val in zip(reference_values, target_values):
+            cai *= (target_val / ref_val) ** (1 / len(reference_values))
+
+        return cai
