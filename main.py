@@ -12,10 +12,27 @@ class CodonSelector:
 
         self.tables.create_table()
 
-    def select_codon(self, amino_acid_sequence):
-        selected_codons = []
-        if amino_acid_sequence[0] != 'M':
+    def translate_sequence(self, sequence):
+
+        if sequence[:3] != 'AUG':
             raise ValueError("Sequence must start with start codon")
+        if len(sequence) % 3 != 0:
+            raise ValueError("Длина последовательности должна быть кратна 3")
+        codons = [sequence[i:i+3] for i in range(0, len(sequence), 3)]
+        amino_acids = [genetic_code()[codon] for codon in codons]
+
+        return ''.join(amino_acids)
+
+    def select_codon(self, sequence):
+
+        if set(sequence) <= {'A', 'U', 'C', 'G'}:
+            amino_acid_sequence = self.translate_sequence(sequence)
+        else:
+            amino_acid_sequence = sequence
+            if amino_acid_sequence[0] != 'M':
+                raise ValueError("Sequence must start with start codon")
+
+        selected_codons = []
 
         for amino_acid in amino_acid_sequence:
             codons_info = self.tables.get_codons_info(amino_acid)

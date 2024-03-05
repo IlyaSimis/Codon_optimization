@@ -1,5 +1,6 @@
 from ecoli import ecoli_usage
 from hsapiens import hsapiens_usage
+from genetic_code_common import genetic_code
 
 
 class Tables:
