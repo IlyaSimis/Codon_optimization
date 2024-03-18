@@ -1,4 +1,8 @@
 import re
+import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
+from matplotlib.lines import Line2D
+import numpy as np
 
 
 class OrganismSelector:
@@ -121,8 +125,58 @@ class PlasmidModel:
             raise ValueError(f"Feature '{feature_name}' not found in plasmid data.")
 
     def plasmid_len(self):
+        """
+        Returns the length of the plasmid sequence.
 
+        This method is useful for verifying the completeness of the inputted plasmid sequence
+        and can be used to ensure that the feature coordinates correspond to the actual length
+        of the plasmid sequence.
+
+        :return: An integer value representing the number of nucleotides in the plasmid sequence.
+        """
         return len(self.plasmid_sequence)
+
+    def plot_plasmid(self):
+        """
+        Plots a circular diagram of the plasmid with marked features.
+        Features are drawn on different levels to avoid overlapping, and closer to the main circle if possible.
+        """
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.set_aspect('equal')
+
+        base_radius = 0.9
+        step = 0.05
+
+        main_circle = plt.Circle((0, 0), base_radius, fill=False, color='black', linewidth=3)
+        ax.add_artist(main_circle)
+
+        levels = {}
+
+        for feature_name, (start, end, direction) in sorted(self.features.items(), key=lambda x: x[1][0]):
+            level = 0
+            while any((start < levels.get(l, (0, 0))[1] and end > levels.get(l, (0, 0))[0]) for l in levels):
+                level += step
+            levels[level] = (start, end)
+
+            start_angle, end_angle = self.get_angles(start, end, direction)
+
+            color = next(ax._get_lines.prop_cycler)['color']
+            wedge = Wedge((0, 0), base_radius - level, start_angle, end_angle, width=step * 0.9,
+                          facecolor=color, edgecolor='black', label=feature_name)
+            ax.add_patch(wedge)
+
+        ax.set_xlim(-1.1, 1.1)
+        ax.set_ylim(-1.1, 1.1)
+        plt.axis('off')
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.show()
+
+    def get_angles(self, start, end, direction):
+        start_angle = (start / self.plasmid_len()) * 360
+        end_angle = (end / self.plasmid_len()) * 360
+        if direction == 'ccw':
+            start_angle, end_angle = end_angle, start_angle
+        return start_angle, end_angle
 
 
 class Cultivation:

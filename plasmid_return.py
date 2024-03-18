@@ -21,4 +21,7 @@ plasmid_model = PlasmidModel(plasmid_data, protein_fasta)
 for feature in plasmid_data['features']:
     feature_sequence = plasmid_model.extract_feature_sequence(feature)
     print(f"{feature} sequence: {feature_sequence}")
-print(plasmid_model.plasmid_len())
+print(f'LEn of sequence is {plasmid_model.plasmid_len()}')
+plasmid_model = PlasmidModel(plasmid_data, protein_fasta)
+plasmid_model.plot_plasmid()
+
