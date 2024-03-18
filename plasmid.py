@@ -1,3 +1,6 @@
+import re
+
+
 class OrganismSelector:
     def __init__(self, amino_acid_sequence):
         self.amino_acid_sequence = amino_acid_sequence
@@ -6,7 +9,6 @@ class OrganismSelector:
     def organism_data_parse(self, organism_info):
         """
         Parses organism information and returns a dictionary with organism data.
-
         :param organism_info: Information about the organism.
         :return: Dictionary with organism data.
         """
@@ -42,55 +44,85 @@ class OrganismSelector:
 
 
 class PlasmidModel:
-    def __init__(self, amino_acid_sequence):
-        self.amino_acid_sequence = amino_acid_sequence
-        self.nucleotide_sequence = ""
-        self.plasmid_data = ""
-        self.tag_sequence = ""
-
-    def sequence_parser(self, amino_acid_sequence, plasmid_sequence):
+    def __init__(self, plasmid_data, protein_fasta):
         """
-        Translates an amino acid sequence to a nucleotide sequence and appends it to the plasmid sequence.
+        Initializes the PlasmidModel with plasmid and protein data.
 
-        :param amino_acid_sequence: A string of amino acids.
-        :param plasmid_sequence: A string representing the sequence of the plasmid.
-        :return: A string representing the nucleotide sequence.
+        :param plasmid_data: A dictionary containing 'fasta' and 'features' keys.
+        :param protein_fasta: A string in FASTA format containing the protein sequence.
         """
-        return plasmid_sequence + amino_acid_sequence
+        self.plasmid_sequence = self.parse_fasta(plasmid_data['fasta'])
+        self.protein_sequence = self.parse_fasta(protein_fasta)
+        self.features = plasmid_data['features']
+        self.combined_sequence = ""
 
-    def plasmid_parser(self, sequence):
+    def parse_fasta(self, fasta_string):
         """
-        Converts sequence data into another format.
+        Parses a FASTA string and extracts the sequence.
 
-        :param sequence: A string representing the nucleotide sequence.
-        :return: The formatted sequence data.
+        :param fasta_string: A string in FASTA format.
+        :return: A string representing the nucleotide or amino acid sequence.
         """
-
+        fasta_body = re.sub(r'>.*\n', '', fasta_string)
+        sequence = re.sub(r'\n', '', fasta_body)
         return sequence
 
-    def plasmid_init(self, plasmid_sequence):
+    def combine_sequences(self):
         """
-        Initializes the plasmid by translating the amino acid sequence and integrating it.
+        Combines the plasmid sequence with the protein sequence.
 
-        :param plasmid_sequence: A string representing the sequence of the plasmid.
-        :return: Initialized plasmid data.
+        :return: A string representing the combined nucleotide sequence.
         """
+        self.combined_sequence = self.plasmid_sequence + self.protein_sequence
+        return self.combined_sequence
 
-        nucleotide_sequence = self.sequence_parser(self.amino_acid_sequence, plasmid_sequence)
-
-        self.plasmid_data = self.plasmid_parser(nucleotide_sequence)
-
-        self.nucleotide_sequence = nucleotide_sequence
-        return self.plasmid_data
-
-    def plasmid_mod(self, plasmid_sequence, tag_sequnce):
+    def extract_feature_sequence(self, feature_name):
         """
-        Modyfied plasmid with tags
-        :param plasmid_sequence: Initialized plasmid data.
-        :return: modyfied plasmid with tags
-        """
+        Extracts the sequence of a given feature from the plasmid based on its coordinates and direction.
 
-        return plasmid_sequence
+        :param feature_name: The name of the feature to be extracted.
+        :return: A string representing the nucleotide sequence of the feature.
+        """
+        if feature_name in self.features:
+            start, end, direction = self.features[feature_name]
+            if direction == 'cw':
+                return self.plasmid_sequence[start-1:end]
+            elif direction == 'ccw':
+                # Extract and reverse-complement the sequence for features in the 'ccw' direction.
+                return self._reverse_complement(self.plasmid_sequence[end-1:start])
+            else:
+                raise ValueError("Direction should be either 'cw' or 'ccw'.")
+        else:
+            raise ValueError(f"Feature '{feature_name}' not found in plasmid data.")
+
+    def _reverse_complement(self, sequence):
+        """
+        Generates the reverse complement of a nucleotide sequence.
+
+        :param sequence: The nucleotide sequence to reverse-complement.
+        :return: The reverse complement sequence.
+        """
+        complement = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
+        return ''.join(complement.get(base, base) for base in reversed(sequence))
+
+    def extract_feature_sequence(self, feature_name):
+        """
+        Extracts the sequence of a given feature from the plasmid based on its coordinates and direction.
+        """
+        if feature_name in self.features:
+            start, end, direction = self.features[feature_name]
+            if direction == 'cw':
+                sequence = self.plasmid_sequence[start-1:end]
+            elif direction == 'ccw':
+                sequence = self.plasmid_sequence[end-1:start]
+                sequence = self._reverse_complement(sequence)
+            return sequence
+        else:
+            raise ValueError(f"Feature '{feature_name}' not found in plasmid data.")
+
+    def plasmid_len(self):
+
+        return len(self.plasmid_sequence)
 
 
 class Cultivation:
