@@ -143,6 +143,7 @@ class PlasmidModel:
         """
         fig, ax = plt.subplots(figsize=(8, 8))
         ax.set_aspect('equal')
+        feature_width = 0.1
 
         base_radius = 0.9
         step = 0.05
@@ -159,11 +160,13 @@ class PlasmidModel:
             levels[level] = (start, end)
 
             start_angle, end_angle = self.get_angles(start, end, direction)
-
             color = next(ax._get_lines.prop_cycler)['color']
-            wedge = Wedge((0, 0), base_radius - level, start_angle, end_angle, width=step * 0.9,
+            wedge = Wedge((0, 0), base_radius - level, start_angle, end_angle, width=feature_width,
                           facecolor=color, edgecolor='black', label=feature_name)
             ax.add_patch(wedge)
+
+            self.draw_boundary_line(ax, start_angle, feature_width)
+            self.draw_boundary_line(ax, end_angle, feature_width)
 
         ax.set_xlim(-1.1, 1.1)
         ax.set_ylim(-1.1, 1.1)
@@ -176,7 +179,18 @@ class PlasmidModel:
         end_angle = (end / self.plasmid_len()) * 360
         if direction == 'ccw':
             start_angle, end_angle = end_angle, start_angle
-        return start_angle, end_angle
+        return start_angle % 360, end_angle % 360
+
+    def draw_boundary_line(self, ax, angle, feature_width):
+        angle_rad = np.radians(angle)
+        inner_radius = 0.9
+        outer_radius = 1.05
+        line = Line2D(
+            [inner_radius * np.cos(angle_rad), outer_radius * np.cos(angle_rad)],
+            [inner_radius * np.sin(angle_rad), outer_radius * np.sin(angle_rad)],
+            color='black', linestyle='-', linewidth=1.5
+        )
+        ax.add_line(line)
 
 
 class Cultivation:
